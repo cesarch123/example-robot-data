@@ -1,5 +1,4 @@
 import sys
-import typing
 from os.path import dirname, exists, join
 
 import numpy as np
@@ -35,9 +34,9 @@ def getModelPath(subpath, verbose=False):
     for path in paths:
         if exists(join(path, subpath.strip("/"))):
             if verbose:
-                print(f"using {path} as modelPath")
+                print("using %s as modelPath" % path)
             return path
-    raise OSError(f"{subpath} not found")
+    raise IOError("%s not found" % subpath)
 
 
 def readParamsFromSrdf(
@@ -60,13 +59,13 @@ def readParamsFromSrdf(
     return q0
 
 
-class RobotLoader:
+class RobotLoader(object):
     path = ""
     urdf_filename = ""
     srdf_filename = ""
     sdf_filename = ""
     sdf_root_link_name = ""
-    sdf_parent_guidance: typing.ClassVar = []
+    sdf_parent_guidance = []
     urdf_subpath = "robots"
     srdf_subpath = "srdf"
     sdf_subpath = ""
@@ -101,9 +100,9 @@ class RobotLoader:
                     self.robot = builder(
                         self.df_path,
                         package_dirs=[join(self.model_path, "../..")],
-                        root_joint=(
-                            pin.JointModelFreeFlyer() if self.free_flyer else None
-                        ),
+                        root_joint=pin.JointModelFreeFlyer()
+                        if self.free_flyer
+                        else None,
                         root_link_name=self.sdf_root_link_name,
                         parent_guidance=self.sdf_parent_guidance,
                     )
@@ -111,9 +110,9 @@ class RobotLoader:
                     self.robot = builder(
                         self.df_path,
                         package_dirs=[join(self.model_path, "../..")],
-                        root_joint=(
-                            pin.JointModelFreeFlyer() if self.free_flyer else None
-                        ),
+                        root_joint=pin.JointModelFreeFlyer()
+                        if self.free_flyer
+                        else None,
                     )
             except AttributeError:
                 raise ImportError("Building SDF models require pinocchio >= 3.0.0")
@@ -144,8 +143,6 @@ class RobotLoader:
         else:
             self.srdf_path = None
             self.robot.q0 = pin.neutral(self.robot.model)
-        root = getModelPath(self.path)
-        self.robot.urdf = join(root, self.path, self.urdf_subpath, self.urdf_filename)
 
         if self.free_flyer:
             self.addFreeFlyerJointLimits()
@@ -177,69 +174,6 @@ class Go1Loader(RobotLoader):
     free_flyer = True
 
 
-class FalconBravo7NoEndEffectorLoader(RobotLoader):
-    path = "falcon_description"
-    urdf_filename = "falcon_bravo7_no_ee.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "falcon_bravo7_no_ee.srdf"
-    ref_posture = "standing"
-    free_flyer = True
-
-
-class BluevoltaBravo7NoEndEffectorLoader(RobotLoader):
-    path = "bluevolta_description"
-    urdf_filename = "bluevolta_bravo7_no_ee.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "bluevolta_bravo7_no_ee.srdf"
-    ref_posture = "standing"
-    free_flyer = True
-
-
-class FalconBravo7GripperLoader(RobotLoader):
-    path = "falcon_description"
-    urdf_filename = "falcon_bravo7_gripper.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "falcon_bravo7_gripper.srdf"
-    ref_posture = "standing"
-    free_flyer = True
-
-
-class BluevoltaBravo7GripperLoader(RobotLoader):
-    path = "bluevolta_description"
-    urdf_filename = "bluevolta_bravo7_gripper.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "bluevolta_bravo7_gripper.srdf"
-    ref_posture = "standing"
-    free_flyer = True
-
-
-class Bravo7NoEndEffectorLoader(RobotLoader):
-    path = "bravo7_description"
-    urdf_filename = "bravo7_no_ee.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "bravo7_no_ee.srdf"
-    ref_posture = "standing"
-    free_flyer = False
-
-
-class Bravo7GripperLoader(RobotLoader):
-    path = "bravo7_description"
-    urdf_filename = "bravo7_gripper.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "bravo7_gripper.srdf"
-    ref_posture = "standing"
-    free_flyer = False
-
-
-class Go2Loader(RobotLoader):
-    path = "go2_description"
-    urdf_filename = "go2.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "go2.srdf"
-    ref_posture = "standing"
-    free_flyer = True
-
-
 class A1Loader(RobotLoader):
     path = "a1_description"
     urdf_filename = "a1.urdf"
@@ -247,20 +181,6 @@ class A1Loader(RobotLoader):
     srdf_filename = "a1.srdf"
     ref_posture = "standing"
     free_flyer = True
-
-
-class Z1Loader(RobotLoader):
-    path = "z1_description"
-    urdf_filename = "z1.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "z1.srdf"
-    ref_posture = "arm_up"
-
-
-class B1Z1Loader(B1Loader):
-    urdf_filename = "b1-z1.urdf"
-    srdf_filename = "b1-z1.srdf"
-    ref_posture = "standing_with_arm_home"
 
 
 class ANYmalLoader(RobotLoader):
@@ -310,7 +230,7 @@ class CassieLoader(RobotLoader):
     ref_posture = "standing"
     free_flyer = True
     sdf_root_link_name = "pelvis"
-    sdf_parent_guidance: typing.ClassVar = [
+    sdf_parent_guidance = [
         "left-roll-op",
         "left-yaw-op",
         "left-pitch-op",
@@ -359,7 +279,7 @@ class TalosArmLoader(TalosLoader):
 
 class TalosLegsLoader(TalosLoader):
     def __init__(self, verbose=False):
-        super().__init__(verbose=verbose)
+        super(TalosLegsLoader, self).__init__(verbose=verbose)
         legMaxId = 14
         m1 = self.robot.model
         m2 = pin.Model()
@@ -396,10 +316,7 @@ class TalosLegsLoader(TalosLoader):
 
         # q2 = self.robot.q0[:19]
         for f in m1.frames:
-            if tuple(int(i) for i in pin.__version__.split(".")) >= (3, 0, 0):
-                if f.parentJoint < legMaxId:
-                    m2.addFrame(f)
-            elif f.parent < legMaxId:
+            if f.parent < legMaxId:
                 m2.addFrame(f)
 
         g2 = pin.GeometryModel()
@@ -443,16 +360,6 @@ class BoltLoader(RobotLoader):
     free_flyer = True
 
 
-class BorinotLoader(RobotLoader):
-    path = "borinot_description"
-    urdf_subpath = "urdf"
-    srdf_subpath = "srdf"
-    urdf_filename = "borinot_flying_arm_2.urdf"
-    srdf_filename = "borinot_flying_arm_2.srdf"
-    ref_posture = "home"
-    free_flyer = True
-
-
 class Solo8Loader(RobotLoader):
     path = "solo_description"
     urdf_filename = "solo.urdf"
@@ -479,6 +386,26 @@ class KinovaLoader(RobotLoader):
     srdf_filename = "kinova.srdf"
     ref_posture = "arm_up"
 
+
+class KinovaGen3Loader(RobotLoader):
+    path = "kinova_gen3"
+    urdf_filename = "kinova.urdf"
+    urdf_subpath = "urdf"
+
+class KinovaTwoArmLoader(RobotLoader):
+    path = "kinova_two_arm"
+    urdf_filename = "kinova_two_arm_branched_closer.urdf"
+    urdf_subpath = "urdf"
+
+class KinovaThreeArmLoader(RobotLoader):
+    path = "kinova_three_arm"
+    urdf_filename = "kinova_three_arm_branched.urdf"
+    urdf_subpath = "urdf"
+
+class DigitPinnedLoader(RobotLoader):
+    path = "digit_pinned"
+    urdf_filename = "digit-v3-modified-pinned.urdf"
+    urdf_subpath = "urdf"
 
 class TiagoLoader(RobotLoader):
     path = "tiago_description"
@@ -509,30 +436,6 @@ class PandaLoader(RobotLoader):
     urdf_filename = "panda.urdf"
     urdf_subpath = "urdf"
     srdf_filename = "panda.srdf"
-    ref_posture = "default"
-
-
-class AlexNubHandsLoader(RobotLoader):
-    path = "alex_description"
-    urdf_filename = "alex_nub_hands.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "alex_nub_hands.srdf"
-    ref_posture = "default"
-
-
-class AlexPsyonicHandsLoader(RobotLoader):
-    path = "alex_description"
-    urdf_filename = "alex_psyonic_hands.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "alex_psyonic_hands.srdf"
-    ref_posture = "default"
-
-
-class AlexSakeHandsLoader(RobotLoader):
-    path = "alex_description"
-    urdf_filename = "alex_sake_hands.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "alex_sake_hands.srdf"
     ref_posture = "default"
 
 
@@ -592,15 +495,36 @@ class HectorLoader(RobotLoader):
     free_flyer = True
 
 
-class HextiltLoader(RobotLoader):
-    path = "hextilt_description"
+class CustomDoublePendulumLoader(RobotLoader):
+    path = "custom_double_pendulum_description"
+    urdf_filename = "dpend_v6.urdf"
     urdf_subpath = "urdf"
-    srdf_subpath = "srdf"
-    urdf_filename = "hextilt_flying_arm_5.urdf"
-    srdf_filename = "hextilt_flying_arm_5.srdf"
-    ref_posture = "home"
-    free_flyer = True
 
+
+class CustomSinglePendulumLoader(RobotLoader):
+    path = "custom_single_pendulum_description"
+    urdf_filename = "pen-1.urdf"
+    urdf_subpath = "urdf"
+
+class CustomTriplePendulumLoader(RobotLoader):
+    path = "custom_triple_pendulum_description"
+    urdf_filename = "pen-3.urdf"
+    urdf_subpath = "urdf"
+
+class CustomFourPendulumLoader(RobotLoader):
+    path = "custom_four_pendulum_description"
+    urdf_filename = "pen-4.urdf"
+    urdf_subpath = "urdf"
+
+class CustomFivePendulumLoader(RobotLoader):
+    path = "custom_five_pendulum_description"
+    urdf_filename = "pen-5.urdf"
+    urdf_subpath = "urdf"
+
+class CustomSixPendulumLoader(RobotLoader):
+    path = "custom_six_pendulum_description"
+    urdf_filename = "pen-6.urdf"
+    urdf_subpath = "urdf"
 
 class DoublePendulumLoader(RobotLoader):
     path = "double_pendulum_description"
@@ -614,13 +538,6 @@ class DoublePendulumContinuousLoader(DoublePendulumLoader):
 
 class DoublePendulumSimpleLoader(DoublePendulumLoader):
     urdf_filename = "double_pendulum_simple.urdf"
-
-
-class QuadrupedLoader(RobotLoader):
-    path = "quadruped_description"
-    urdf_subpath = "urdf"
-    urdf_filename = "quadruped.urdf"
-    free_flyer = True
 
 
 class RomeoLoader(RobotLoader):
@@ -649,28 +566,10 @@ class IrisLoader(RobotLoader):
     free_flyer = True
 
 
-class PR2Loader(RobotLoader):
-    path = "pr2_description"
-    urdf_filename = "pr2.urdf"
-    urdf_subpath = "urdf"
-    srdf_filename = "pr2.srdf"
-    free_flyer = True
-    ref_posture = "tuck_left_arm"
-
-
 ROBOTS = {
     "b1": B1Loader,
-    "bravo7_gripper": Bravo7GripperLoader,
-    "bravo7_no_ee": Bravo7NoEndEffectorLoader,
-    "falcon_bravo7_no_ee": FalconBravo7NoEndEffectorLoader,
-    "falcon_bravo7_gripper": FalconBravo7GripperLoader,
-    "bluevolta_bravo7_no_ee": BluevoltaBravo7NoEndEffectorLoader,
-    "bluevolta_bravo7_gripper": BluevoltaBravo7GripperLoader,
     "go1": Go1Loader,
-    "go2": Go2Loader,
     "a1": A1Loader,
-    "z1": Z1Loader,
-    "b1_z1": B1Z1Loader,
     "anymal": ANYmalLoader,
     "anymal_c": ANYmalCLoader,
     "anymal_kinova": ANYmalKinovaLoader,
@@ -680,30 +579,33 @@ ROBOTS = {
     "double_pendulum": DoublePendulumLoader,
     "double_pendulum_continuous": DoublePendulumContinuousLoader,
     "double_pendulum_simple": DoublePendulumSimpleLoader,
+    "custom_double_pendulum": CustomDoublePendulumLoader, # Added for the AGHF
+    "custom_single_pendulum": CustomSinglePendulumLoader, # Added for the AGHF
+    "custom_triple_pendulum": CustomTriplePendulumLoader, # Added for the AGHF
+    "custom_four_pendulum": CustomFourPendulumLoader, # Added for the AGHF
+    "custom_five_pendulum": CustomFivePendulumLoader, # Added for the AGHF
+    "custom_six_pendulum": CustomSixPendulumLoader, # Added for the AGHF
     "hector": HectorLoader,
-    "hextilt": HextiltLoader,
     "hyq": HyQLoader,
     "icub": ICubLoader,
     "icub_reduced": ICubReducedLoader,
     "iris": IrisLoader,
     "kinova": KinovaLoader,
+    "kinova_gen3": KinovaGen3Loader, # Added for the AGHF
+    "kinova_two_arm": KinovaTwoArmLoader, # Added for the AGHF
+    "kinova_three_arm": KinovaThreeArmLoader, # Added for the AGHF
+    "digit_pinned": DigitPinnedLoader, # Added for the AGHF
     "laikago": LaikagoLoader,
     "panda": PandaLoader,
-    "alex_nub_hands": AlexNubHandsLoader,
-    "alex_psyonic_hands": AlexPsyonicHandsLoader,
-    "alex_sake_hands": AlexSakeHandsLoader,
     "allegro_right_hand": AllegroRightHandLoader,
     "allegro_left_hand": AllegroLeftHandLoader,
-    "quadruped": QuadrupedLoader,
     "romeo": RomeoLoader,
     "simple_humanoid": SimpleHumanoidLoader,
     "simple_humanoid_classical": SimpleHumanoidClassicalLoader,
     "bolt": BoltLoader,
-    "borinot": BorinotLoader,
     "solo8": Solo8Loader,
     "solo12": Solo12Loader,
     "finger_edu": FingerEduLoader,
-    "pr2": PR2Loader,
     "talos": TalosLoader,
     "talos_box": TalosBoxLoader,
     "talos_arm": TalosArmLoader,
@@ -728,7 +630,9 @@ def loader(name, display=False, rootNodeName="", verbose=False):
     """Load a robot by its name, and optionally display it in a viewer."""
     if name not in ROBOTS:
         robots = ", ".join(sorted(ROBOTS.keys()))
-        raise ValueError(f"Robot '{name}' not found. Possible values are {robots}")
+        raise ValueError(
+            "Robot '%s' not found. Possible values are %s" % (name, robots)
+        )
     inst = ROBOTS[name](verbose=verbose)
     if display:
         if rootNodeName:

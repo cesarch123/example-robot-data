@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<robot name="Acrobot">
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0.0" iyz="0" izz="0"/>
+    </inertial>  
+  </link>
+
+  <link name="upper_link">
+    <inertial>
+      <origin xyz="-0.5 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0.0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <link name="lower_link">
+    <inertial>
+      <origin xyz="-0.5 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0.0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <!-- <link name="end_effector_link">
+    <inertial>
+      <origin xyz="-0.1 0 0" rpy="0 0 0"/>
+      <mass value="0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0.0" iyz="0" izz="0"/>
+    </inertial>    
+  </link> -->
+
+  <joint name="shoulder" type="revolute">
+    <parent link="base_link"/>
+    <child link="upper_link"/>
+    <origin xyz="0 0.0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-99999" upper="99999" effort="99999" velocity="99999"/>
+  </joint>
+
+  <joint name="elbow" type="revolute">
+    <parent link="upper_link"/>
+    <child link="lower_link"/>
+    <origin xyz="-1 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-99999" upper="99999" effort="99999" velocity="99999"/>
+  </joint>
+
+  <!-- <joint name="elbow" type="revolute">
+    <parent link="lower_link"/>
+    <child link="end_effector_link"/>
+    <origin xyz="-1 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-99999" upper="99999" effort="99999" velocity="99999"/>
+  </joint> -->
+
+
+</robot>
