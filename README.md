@@ -11,6 +11,21 @@
 This repository includes a set of robot descriptions that are aimed to be used in benchmarking, unit-tests, teachings,
 tutorials or show-cases. These source files do not intend to substitute their original repositories.
 
+## Phlame-RoahmLab Modification
+
+For the [Phlame paper](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10919247) comparisons we add a pinned Digit-v3 from Agility Robotics, Kinova Gen 3 and 1-5link pendulums to this repository. In order to load the robot, we modified `python/example_robot_data/robots_loader.py`, where 
+we added new loader classes and new indices in the dictionary `ROBOTS`.
+
+If you already installed the original `example-robot-data` repository through conda (by following the procedures in the next section), we suggest you manually apply the changes according to the following procedure:
+1. The urdf and the meshes should be stored in `~/miniconda3/share/example-robot-data/robots`. Copy the folders `robots/custom_single_pendulum_description`, ..., `robots/custom_five_pendulum_description`,  `robots/digit_pinned`, `robots/kinova_gen3` in this repository to location `~/miniconda3/share/example-robot-data/robots`, together with the other robot descriptions.
+2. The python robot loader should be stored in `~/miniconda3/lib/python3.11/site-packages/example_robot_data/robots_loader.py`. Add the changes in `python/example_robot_data/robots_loader.py` of this repository to `~/miniconda3/lib/python3.11/site-packages/example_robot_data/robots_loader.py` (new classes `DigitPinnedLoader`, ..., `KinovaGen3Loader` and new indices `"digit_pinned": DigitPinnedLoader,`, ..., `"kinova_gen3": KinovaGen3Loader,` in the dictionary `ROBOTS`).
+
+Then you should be able to import Digit in python really easily:
+```
+import example_robot_data as erd
+robot = erd.load('digit_pinned')
+```
+
 ## :penguin: Installation
 
 ### :package: From Debian / Ubuntu packages, with [robotpkg](http://robotpkg.openrobots.org)
